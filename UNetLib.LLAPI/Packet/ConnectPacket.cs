@@ -18,4 +18,9 @@ public class ConnectPacket : SystemPacket
         LibVersion = reader.ReadUInt32();
         Crc = reader.ReadUInt32();
     }
+
+    public override string ToString()
+    {
+        return $"{base.ToString()}, LibVersion={LibVersion}, Crc={Crc}";
+    }
 }

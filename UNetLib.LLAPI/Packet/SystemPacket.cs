@@ -28,6 +28,11 @@ public abstract class SystemPacket : PacketBaseHeader
         RemoteConnectionId = reader.ReadUInt16();
     }
 
+    public override string ToString()
+    {
+        return $"ConnectionId={ConnectionId}, RequestType={RequestType}, PacketId={PacketId}, SessionId={SessionId}, LocalConnectionId={LocalConnectionId}, RemoteConnectionId={RemoteConnectionId}";
+    }
+
     public enum SystemRequestType : byte
     {
         ConnectRequest = 1,

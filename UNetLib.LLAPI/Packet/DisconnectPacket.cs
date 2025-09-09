@@ -19,6 +19,11 @@ public class DisconnectPacket : SystemPacket
         Reason = reader.ReadEnum<DisconnectReason>();
     }
 
+    public override string ToString()
+    {
+        return $"{base.ToString()}, LibVersion={LibVersion}, Reason={Reason}";
+    }
+
     public enum DisconnectReason : byte
     {
         Ok,

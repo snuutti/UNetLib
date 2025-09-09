@@ -30,4 +30,9 @@ public class PingPacket : SystemPacket
         ExtDropRate = reader.ReadByte();
         RemoteSessionId = reader.ReadUInt16();
     }
+
+    public override string ToString()
+    {
+        return $"{base.ToString()}, SentPingTime={SentPingTime}, AckPingTime={AckPingTime}, LocalTimeCorrection={LocalTimeCorrection}, IntDropRate={IntDropRate}, ExtDropRate={ExtDropRate}, RemoteSessionId={RemoteSessionId}";
+    }
 }
