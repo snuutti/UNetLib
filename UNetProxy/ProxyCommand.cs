@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.ComponentModel;
 using System.Net;
 using System.Net.Sockets;
 using Spectre.Console;
@@ -7,26 +6,11 @@ using Spectre.Console.Cli;
 
 namespace UNetProxy;
 
-public class ProxyCommand : AsyncCommand<ProxyCommand.Settings>
+public class ProxyCommand : AsyncCommand<ProxySettings>
 {
     private readonly ConcurrentDictionary<IPEndPoint, UdpSession> _sessions = new();
 
-    public class Settings : CommandSettings
-    {
-        [Description("Port to listen on for incoming UDP packets.")]
-        [CommandArgument(0, "<Listen Port>")]
-        public required int ListenPort { get; set; }
-
-        [Description("Target host to forward packets to.")]
-        [CommandArgument(1, "<Target Host>")]
-        public required string TargetHost { get; set; }
-
-        [Description("Target port to forward packets to.")]
-        [CommandArgument(2, "<Target Port>")]
-        public required int TargetPort { get; set; }
-    }
-
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, ProxySettings settings)
     {
         AnsiConsole.WriteLine("UNetProxy");
         AnsiConsole.WriteLine();
