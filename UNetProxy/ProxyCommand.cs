@@ -48,7 +48,7 @@ public class ProxyCommand : AsyncCommand<ProxySettings>
                 if (!_sessions.TryGetValue(sourceEndPoint, out var session))
                 {
                     // TODO: Cleanup old sessions
-                    session = new UdpSession(sourceEndPoint, targetEndPoint, listener, cts);
+                    session = new UdpSession(sourceEndPoint, targetEndPoint, listener, cts, settings);
                     _sessions[sourceEndPoint] = session;
                     AnsiConsole.MarkupLine($"[blue]Created new session for {sourceEndPoint}[/]");
                 }

@@ -13,9 +13,10 @@ public sealed class UdpSession : IDisposable
     private readonly UdpClient _clientListener;
     private readonly UdpClient _forwardingClient;
     private readonly CancellationTokenSource _cts;
+    private readonly ProxySettings _settings;
 
     public UdpSession(IPEndPoint clientEndPoint, IPEndPoint targetEndPoint, UdpClient clientListener,
-        CancellationTokenSource parentCts)
+        CancellationTokenSource parentCts, ProxySettings settings)
     {
         _clientEndPoint = clientEndPoint;
         _targetEndPoint = targetEndPoint;
@@ -23,6 +24,7 @@ public sealed class UdpSession : IDisposable
         _forwardingClient = new UdpClient();
         _forwardingClient.Connect(targetEndPoint);
         _cts = CancellationTokenSource.CreateLinkedTokenSource(parentCts.Token);
+        _settings = settings;
 
         _ = ReceiveLoopAsync();
     }
@@ -67,7 +69,7 @@ public sealed class UdpSession : IDisposable
         _forwardingClient.Dispose();
     }
 
-    private static void LogPacket(byte[] buffer, IPEndPoint from, IPEndPoint to, bool fromClient)
+    private void LogPacket(byte[] buffer, IPEndPoint from, IPEndPoint to, bool fromClient)
     {
         var direction = fromClient ? "[[CLIENT -> SERVER]]" : "[[SERVER -> CLIENT]]";
 
@@ -94,6 +96,11 @@ public sealed class UdpSession : IDisposable
                 break;
 
             case SystemPacket.SystemRequestType.Ping:
+                if (!_settings.LogPings)
+                {
+                    return;
+                }
+
                 systemPacket = new PingPacket();
                 break;
 

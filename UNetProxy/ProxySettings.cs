@@ -16,4 +16,9 @@ public class ProxySettings : CommandSettings
     [Description("Target port to forward packets to.")]
     [CommandArgument(2, "<Target Port>")]
     public required int TargetPort { get; set; }
+
+    [Description("Enable logging of ping packets.")]
+    [CommandOption("--log-pings")]
+    [DefaultValue(true)]
+    public bool LogPings { get; set; }
 }
