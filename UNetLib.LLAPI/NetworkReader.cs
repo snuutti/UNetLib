@@ -15,6 +15,8 @@ public class NetworkReader
 
     public long Length => _stream.Length;
 
+    public bool IsAtEnd => _stream.Position >= _stream.Length;
+
     public NetworkReader(byte[] buffer)
     {
         _stream = new MemoryStream(buffer);

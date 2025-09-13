@@ -77,6 +77,25 @@ public sealed class UdpSession : IDisposable
         var connectionId = reader.ReadUInt16();
         if (connectionId != 0)
         {
+            var packetId = reader.ReadUInt16();
+            var sessionId = reader.ReadUInt16();
+
+            var ackMessageId = reader.ReadUInt16();
+            var acks = new uint[1];
+            acks[0] = reader.ReadUInt32();
+
+            var ackPacket = $"ConnectionId={connectionId}, PacketId={packetId}, SessionId={sessionId}, AckMessageId={ackMessageId}, Acks={string.Join(", ", acks)}";
+            if (reader.IsAtEnd)
+            {
+                if (!_settings.LogAcks)
+                {
+                    return;
+                }
+
+                AnsiConsole.MarkupLine($"[green][[{DateTime.Now:HH:mm:ss}]] {direction} (Acknowledge Packet) From {from} To {to} ({buffer.Length} bytes)[/]\n{ackPacket}");
+                return;
+            }
+
             // TODO: Implement user packet handling
             AnsiConsole.MarkupLine($"[green][[{DateTime.Now:HH:mm:ss}]] {direction} (User Packet) From {from} To {to} ({buffer.Length} bytes)[/]\n{BitConverter.ToString(buffer)}");
             return;

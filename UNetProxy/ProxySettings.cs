@@ -21,4 +21,9 @@ public class ProxySettings : CommandSettings
     [CommandOption("--log-pings")]
     [DefaultValue(true)]
     public bool LogPings { get; set; }
+
+    [Description("Enable logging of ack packets.")]
+    [CommandOption("--log-acks")]
+    [DefaultValue(true)]
+    public bool LogAcks { get; set; }
 }
