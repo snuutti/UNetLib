@@ -17,6 +17,11 @@ public class ProxySettings : CommandSettings
     [CommandArgument(2, "<Target Port>")]
     public required int TargetPort { get; set; }
 
+    [Description("Use long acks")]
+    [CommandOption("--long-acks")]
+    [DefaultValue(false)]
+    public bool LongAcks { get; set; }
+
     [Description("Enable logging of ping packets.")]
     [CommandOption("--log-pings")]
     [DefaultValue(true)]

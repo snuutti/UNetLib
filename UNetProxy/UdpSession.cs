@@ -12,17 +12,19 @@ public sealed class UdpSession : IDisposable
     private readonly IPEndPoint _targetEndPoint;
     private readonly UdpClient _clientListener;
     private readonly UdpClient _forwardingClient;
+    private readonly ConnectionConfig _connectionConfig;
     private readonly CancellationTokenSource _cts;
     private readonly ProxySettings _settings;
 
     public UdpSession(IPEndPoint clientEndPoint, IPEndPoint targetEndPoint, UdpClient clientListener,
-        CancellationTokenSource parentCts, ProxySettings settings)
+        ConnectionConfig connectionConfig, CancellationTokenSource parentCts, ProxySettings settings)
     {
         _clientEndPoint = clientEndPoint;
         _targetEndPoint = targetEndPoint;
         _clientListener = clientListener;
         _forwardingClient = new UdpClient();
         _forwardingClient.Connect(targetEndPoint);
+        _connectionConfig = connectionConfig;
         _cts = CancellationTokenSource.CreateLinkedTokenSource(parentCts.Token);
         _settings = settings;
 
@@ -81,8 +83,19 @@ public sealed class UdpSession : IDisposable
             var sessionId = reader.ReadUInt16();
 
             var ackMessageId = reader.ReadUInt16();
-            var acks = new uint[1];
-            acks[0] = reader.ReadUInt32();
+            uint[] acks;
+
+            if (_connectionConfig.IsAcksLong)
+            {
+                acks = new uint[2];
+                acks[0] = reader.ReadUInt32();
+                acks[1] = reader.ReadUInt32();
+            }
+            else
+            {
+                acks = new uint[1];
+                acks[0] = reader.ReadUInt32();
+            }
 
             var ackPacket = $"ConnectionId={connectionId}, PacketId={packetId}, SessionId={sessionId}, AckMessageId={ackMessageId}, Acks={string.Join(", ", acks)}";
             if (reader.IsAtEnd)

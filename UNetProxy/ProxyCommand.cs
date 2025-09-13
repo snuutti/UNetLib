@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UNetLib.LLAPI;
 
 namespace UNetProxy;
 
@@ -21,6 +22,11 @@ public class ProxyCommand : AsyncCommand<ProxySettings>
             AnsiConsole.MarkupLine($"[red]Could not resolve host {settings.TargetHost}[/]");
             return 1;
         }
+
+        var connectionConfig = new ConnectionConfig
+        {
+            IsAcksLong = settings.LongAcks
+        };
 
         var targetEndPoint = new IPEndPoint(targetIps[0], settings.TargetPort);
 
@@ -48,7 +54,7 @@ public class ProxyCommand : AsyncCommand<ProxySettings>
                 if (!_sessions.TryGetValue(sourceEndPoint, out var session))
                 {
                     // TODO: Cleanup old sessions
-                    session = new UdpSession(sourceEndPoint, targetEndPoint, listener, cts, settings);
+                    session = new UdpSession(sourceEndPoint, targetEndPoint, listener, connectionConfig, cts, settings);
                     _sessions[sourceEndPoint] = session;
                     AnsiConsole.MarkupLine($"[blue]Created new session for {sourceEndPoint}[/]");
                 }
