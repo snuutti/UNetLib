@@ -179,6 +179,10 @@ public sealed class UdpSession : IDisposable
                         message = new ReadyMessage();
                         break;
 
+                    case 36:// NotReady
+                        message = new NotReadyMessage();
+                        break;
+
                     case 37:// AddPlayer
                         message = new AddPlayerMessage();
                         break;
@@ -187,8 +191,16 @@ public sealed class UdpSession : IDisposable
                         message = new RemovePlayerMessage();
                         break;
 
+                    case 39:// Scene
+                        message = new StringMessage();
+                        break;
+
                     case 43:// LobbyReadyToBegin
                         message = new LobbyReadyToBeginMessage();
+                        break;
+
+                    case 44:// LobbySceneLoaded
+                        message = new IntegerMessage();
                         break;
 
                     case 45:// LobbyAddPlayerFailed
