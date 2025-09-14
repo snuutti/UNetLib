@@ -2,7 +2,7 @@ using System.Net;
 
 namespace UNetLib.LLAPI;
 
-public class NetworkReader
+public class LLNetworkReader
 {
     private readonly MemoryStream _stream;
     private readonly BinaryReader _reader;
@@ -17,7 +17,7 @@ public class NetworkReader
 
     public bool IsAtEnd => _stream.Position >= _stream.Length;
 
-    public NetworkReader(byte[] buffer)
+    public LLNetworkReader(byte[] buffer)
     {
         _stream = new MemoryStream(buffer);
         _reader = new BinaryReader(_stream);

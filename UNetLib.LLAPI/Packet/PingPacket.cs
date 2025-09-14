@@ -9,7 +9,7 @@ public class PingPacket : SystemPacket
     public byte ExtDropRate { get; set; }
     public ushort RemoteSessionId { get; set; }
 
-    public override void Serialize(NetworkWriter writer)
+    public override void Serialize(LLNetworkWriter writer)
     {
         base.Serialize(writer);
         writer.Write(SentPingTime);
@@ -20,7 +20,7 @@ public class PingPacket : SystemPacket
         writer.Write(RemoteSessionId);
     }
 
-    public override void Deserialize(NetworkReader reader)
+    public override void Deserialize(LLNetworkReader reader)
     {
         base.Deserialize(reader);
         SentPingTime = reader.ReadUInt32();

@@ -8,7 +8,7 @@ public abstract class SystemPacket : PacketBaseHeader
     public ushort LocalConnectionId { get; set; }
     public ushort RemoteConnectionId { get; set; }
 
-    public override void Serialize(NetworkWriter writer)
+    public override void Serialize(LLNetworkWriter writer)
     {
         writer.Write(ConnectionId);
         writer.Write(RequestType);
@@ -18,7 +18,7 @@ public abstract class SystemPacket : PacketBaseHeader
         writer.Write(RemoteConnectionId);
     }
 
-    public override void Deserialize(NetworkReader reader)
+    public override void Deserialize(LLNetworkReader reader)
     {
         ConnectionId = reader.ReadUInt16();
         RequestType = reader.ReadEnum<SystemRequestType>();

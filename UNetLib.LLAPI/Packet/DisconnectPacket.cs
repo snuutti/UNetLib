@@ -5,14 +5,14 @@ public class DisconnectPacket : SystemPacket
     public uint LibVersion { get; set; }
     public DisconnectReason Reason { get; set; }
 
-    public override void Serialize(NetworkWriter writer)
+    public override void Serialize(LLNetworkWriter writer)
     {
         base.Serialize(writer);
         writer.Write(LibVersion);
         writer.Write(Reason);
     }
 
-    public override void Deserialize(NetworkReader reader)
+    public override void Deserialize(LLNetworkReader reader)
     {
         base.Deserialize(reader);
         LibVersion = reader.ReadUInt32();

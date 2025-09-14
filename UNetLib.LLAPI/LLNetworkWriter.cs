@@ -2,12 +2,12 @@ using System.Net;
 
 namespace UNetLib.LLAPI;
 
-public class NetworkWriter
+public class LLNetworkWriter
 {
     private readonly MemoryStream _stream;
     private readonly BinaryWriter _writer;
 
-    public NetworkWriter()
+    public LLNetworkWriter()
     {
         _stream = new MemoryStream();
         _writer = new BinaryWriter(_stream);

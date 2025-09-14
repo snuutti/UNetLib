@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UNetLib.LLAPI", "UNetLib.LL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UNetProxy", "UNetProxy\UNetProxy.csproj", "{6FF2F213-4910-47A7-8167-A0D330272B8A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UNetLib.HLAPI", "UNetLib.HLAPI\UNetLib.HLAPI.csproj", "{78C634E7-7D0A-4B67-9A41-5E15DF13B938}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{6FF2F213-4910-47A7-8167-A0D330272B8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FF2F213-4910-47A7-8167-A0D330272B8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FF2F213-4910-47A7-8167-A0D330272B8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78C634E7-7D0A-4B67-9A41-5E15DF13B938}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78C634E7-7D0A-4B67-9A41-5E15DF13B938}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78C634E7-7D0A-4B67-9A41-5E15DF13B938}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78C634E7-7D0A-4B67-9A41-5E15DF13B938}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

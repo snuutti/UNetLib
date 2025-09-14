@@ -5,14 +5,14 @@ public class ConnectPacket : SystemPacket
     public uint LibVersion { get; set; }
     public uint Crc { get; set; }
 
-    public override void Serialize(NetworkWriter writer)
+    public override void Serialize(LLNetworkWriter writer)
     {
         base.Serialize(writer);
         writer.Write(LibVersion);
         writer.Write(Crc);
     }
 
-    public override void Deserialize(NetworkReader reader)
+    public override void Deserialize(LLNetworkReader reader)
     {
         base.Deserialize(reader);
         LibVersion = reader.ReadUInt32();

@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Sockets;
 using Spectre.Console;
+using UNetLib.HLAPI;
+using UNetLib.HLAPI.Messages;
 using UNetLib.LLAPI;
 using UNetLib.LLAPI.Packet;
 
@@ -91,7 +93,7 @@ public sealed class UdpSession : IDisposable
     {
         var direction = fromClient ? "[[CLIENT -> SERVER]]" : "[[SERVER -> CLIENT]]";
 
-        var reader = new NetworkReader(buffer);
+        var reader = new LLNetworkReader(buffer);
         var connectionId = reader.ReadUInt16();
         if (connectionId != 0)
         {
@@ -140,7 +142,69 @@ public sealed class UdpSession : IDisposable
             var payloadLength = length - 6;
             var payload = reader.ReadBytes(payloadLength);
 
-            AnsiConsole.MarkupLine($"[green][[{DateTime.Now:HH:mm:ss}]] {direction} (User Packet) From {from} To {to} ({buffer.Length} bytes)[/]");
+            AnsiConsole.MarkupLine($"[green][[{DateTime.Now:HH:mm:ss}]] {direction} (User Packet) From {from} To {to} ({buffer.Length} bytes)[/]\n{ackPacket}");
+
+            var hlapiReader = new NetworkReader(payload);
+
+            while (hlapiReader.Position < payloadLength)
+            {
+                var size = hlapiReader.ReadUInt16();
+                var msgType = hlapiReader.ReadInt16();
+                var msgBuffer = hlapiReader.ReadBytes(size);
+
+                IMessageBase message;
+                switch (msgType)
+                {
+                    case 1:// ObjectDestroy
+                        message = new ObjectDestroyMessage();
+                        break;
+
+                    case 3:// ObjectSpawn
+                        message = new ObjectSpawnMessage();
+                        break;
+
+                    case 4:// Owner
+                        message = new OwnerMessage();
+                        break;
+
+                    case 12:// SpawnFinished
+                        message = new ObjectSpawnFinishedMessage();
+                        break;
+
+                    case 14:// CRC
+                        message = new CrcMessage();
+                        break;
+
+                    case 35:// Ready
+                        message = new ReadyMessage();
+                        break;
+
+                    case 37:// AddPlayer
+                        message = new AddPlayerMessage();
+                        break;
+
+                    case 38:// RemovePlayer
+                        message = new RemovePlayerMessage();
+                        break;
+
+                    case 43:// LobbyReadyToBegin
+                        message = new LobbyReadyToBeginMessage();
+                        break;
+
+                    case 45:// LobbyAddPlayerFailed
+                        message = new EmptyMessage();
+                        break;
+
+                    default:
+                        AnsiConsole.WriteLine($"  HLAPI Message: Size={size}, MsgType={msgType}, MsgBuffer={BitConverter.ToString(msgBuffer)}");
+                        continue;
+                }
+
+                var msgReader = new NetworkReader(msgBuffer);
+                message.Deserialize(msgReader);
+                AnsiConsole.WriteLine($"  HLAPI Message: {message}");
+            }
+
             return;
         }
 

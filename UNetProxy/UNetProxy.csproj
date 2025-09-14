@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\UNetLib.HLAPI\UNetLib.HLAPI.csproj" />
         <ProjectReference Include="..\UNetLib.LLAPI\UNetLib.LLAPI.csproj" />
     </ItemGroup>
 

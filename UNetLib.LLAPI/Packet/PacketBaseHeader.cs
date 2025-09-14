@@ -4,6 +4,6 @@ public abstract class PacketBaseHeader
 {
     public ushort ConnectionId { get; set; }
 
-    public abstract void Serialize(NetworkWriter writer);
-    public abstract void Deserialize(NetworkReader reader);
+    public abstract void Serialize(LLNetworkWriter writer);
+    public abstract void Deserialize(LLNetworkReader reader);
 }
