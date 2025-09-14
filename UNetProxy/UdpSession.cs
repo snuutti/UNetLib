@@ -125,8 +125,22 @@ public sealed class UdpSession : IDisposable
                 return;
             }
 
-            // TODO: Implement user packet handling
-            AnsiConsole.MarkupLine($"[green][[{DateTime.Now:HH:mm:ss}]] {direction} (User Packet) From {from} To {to} ({buffer.Length} bytes)[/]\n{BitConverter.ToString(buffer)}");
+            var channelId = reader.ReadByte();
+            var qosType = GetChannelType(channelId);
+            reader.ReadByte(); // some kind of delimiter maybe?
+            var length = reader.ReadMessageLength();
+
+            var messageId = reader.ReadUInt16();
+
+            if (qosType is QosType.UnreliableSequenced or QosType.ReliableSequenced)
+            {
+                var orderedMessageId = reader.ReadByte();
+            }
+
+            var payloadLength = length - 6;
+            var payload = reader.ReadBytes(payloadLength);
+
+            AnsiConsole.MarkupLine($"[green][[{DateTime.Now:HH:mm:ss}]] {direction} (User Packet) From {from} To {to} ({buffer.Length} bytes)[/]");
             return;
         }
 
@@ -159,5 +173,15 @@ public sealed class UdpSession : IDisposable
 
         systemPacket.Deserialize(reader);
         AnsiConsole.MarkupLine($"[blue][[{DateTime.Now:HH:mm:ss}]] {direction} ({requestType}) From {from} To {to} ({buffer.Length} bytes)[/]\n{systemPacket}");
+    }
+
+    private QosType GetChannelType(byte channelId)
+    {
+        if (channelId >= _connectionConfig.Channels.Count)
+        {
+            return QosType.Unreliable;
+        }
+
+        return _connectionConfig.Channels[channelId];
     }
 }

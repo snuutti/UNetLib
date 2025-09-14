@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Spectre.Console.Cli;
+using UNetLib.LLAPI;
 
 namespace UNetProxy;
 
@@ -17,10 +18,17 @@ public class ProxySettings : CommandSettings
     [CommandArgument(2, "<Target Port>")]
     public required int TargetPort { get; set; }
 
-    [Description("Use long acks")]
+    [Description("Use long acks.")]
     [CommandOption("--long-acks")]
     [DefaultValue(false)]
     public bool LongAcks { get; set; }
+
+    [Description("Channel types.")]
+    [CommandOption("-c|--channel <VALUES>")]
+    public QosType[] Channels { get; set; } = [
+        QosType.ReliableSequenced,
+        QosType.Unreliable
+    ];
 
     [Description("Enable logging of ping packets.")]
     [CommandOption("--log-pings")]

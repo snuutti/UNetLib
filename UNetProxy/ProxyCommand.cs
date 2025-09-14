@@ -25,7 +25,8 @@ public class ProxyCommand : AsyncCommand<ProxySettings>
 
         var connectionConfig = new ConnectionConfig
         {
-            IsAcksLong = settings.LongAcks
+            IsAcksLong = settings.LongAcks,
+            Channels = settings.Channels.ToList()
         };
 
         var targetEndPoint = new IPEndPoint(targetIps[0], settings.TargetPort);
