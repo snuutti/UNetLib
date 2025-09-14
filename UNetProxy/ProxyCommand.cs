@@ -67,7 +67,7 @@ public class ProxyCommand : AsyncCommand<ProxySettings>
             }
             catch (Exception e)
             {
-                AnsiConsole.MarkupLine($"[red]{e}[/]");
+                AnsiConsole.WriteException(e);
             }
         }
 

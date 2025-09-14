@@ -47,7 +47,7 @@ public sealed class UdpSession : IDisposable
         }
         catch (Exception e)
         {
-            AnsiConsole.MarkupLine($"[red]{e}[/]");
+            AnsiConsole.WriteException(e);
         }
     }
 
@@ -55,12 +55,28 @@ public sealed class UdpSession : IDisposable
     {
         if (fromClient)
         {
-            LogPacket(buffer, _clientEndPoint, _targetEndPoint, true);
+            try
+            {
+                LogPacket(buffer, _clientEndPoint, _targetEndPoint, true);
+            }
+            catch (Exception e)
+            {
+                AnsiConsole.WriteException(e);
+            }
+
             await _forwardingClient.SendAsync(buffer, buffer.Length);
         }
         else
         {
-            LogPacket(buffer, _targetEndPoint, _clientEndPoint, false);
+            try
+            {
+                LogPacket(buffer, _targetEndPoint, _clientEndPoint, false);
+            }
+            catch (Exception e)
+            {
+                AnsiConsole.WriteException(e);
+            }
+
             await _clientListener.SendAsync(buffer, buffer.Length, _clientEndPoint);
         }
     }
