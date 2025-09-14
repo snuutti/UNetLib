@@ -57,6 +57,6 @@ public class NetworkReader
         }
 
         var secondByte = ReadByte();
-        return (ushort) (((firstByte & 0x7F) << 8) | secondByte);
+        return (ushort) (((secondByte & 0x7F) << 8) | firstByte);
     }
 }
