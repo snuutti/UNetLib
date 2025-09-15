@@ -131,14 +131,21 @@ public sealed class UdpSession : IDisposable
             var qosType = GetChannelType(channelId);
             var length = reader.ReadUInt16();
 
-            var messageId = reader.ReadUInt16();
+            var headerLength = 3;
 
-            if (qosType is QosType.UnreliableSequenced or QosType.ReliableSequenced)
+            if (IsChannelReliable(qosType))
             {
-                var orderedMessageId = reader.ReadByte();
+                var messageId = reader.ReadUInt16();
+                headerLength += 2;
             }
 
-            var payloadLength = length - 6;
+            if (IsChannelSequenced(qosType))
+            {
+                var orderedMessageId = reader.ReadByte();
+                headerLength += 1;
+            }
+
+            var payloadLength = length - headerLength;
             var payload = reader.ReadBytes(payloadLength);
 
             AnsiConsole.MarkupLine($"[green][[{DateTime.Now:HH:mm:ss}]] {direction} (User Packet) From {from} To {to} ({buffer.Length} bytes)[/]\n{ackPacket}");
@@ -262,5 +269,16 @@ public sealed class UdpSession : IDisposable
         }
 
         return _connectionConfig.Channels[channelId];
+    }
+
+    private static bool IsChannelReliable(QosType qosType)
+    {
+        return qosType is QosType.Reliable or QosType.ReliableFragmented or QosType.ReliableSequenced
+            or QosType.ReliableStateUpdate or QosType.AllCostDelivery;
+    }
+
+    private static bool IsChannelSequenced(QosType qosType)
+    {
+        return qosType is QosType.UnreliableSequenced or QosType.ReliableSequenced;
     }
 }
