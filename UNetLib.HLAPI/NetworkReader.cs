@@ -36,6 +36,11 @@ public class NetworkReader
 
     public byte[] ReadBytes(int count)
     {
+        if (Length - Position < count)
+        {
+            throw new IndexOutOfRangeException($"ReadBytes() out of range: {count} bytes requested, {Length - Position} bytes available");
+        }
+
         return _reader.ReadBytes(count);
     }
 
