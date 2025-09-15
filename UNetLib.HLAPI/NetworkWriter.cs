@@ -136,6 +136,11 @@ public class NetworkWriter
         WritePackedUInt32(value.Value);
     }
 
+    public void Write(NetworkSceneId value)
+    {
+        WritePackedUInt32(value.Value);
+    }
+
     public void Write(NetworkHash128 value)
     {
         Write(value.I0);

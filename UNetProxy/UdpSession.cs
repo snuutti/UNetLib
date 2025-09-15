@@ -166,6 +166,10 @@ public sealed class UdpSession : IDisposable
                         message = new OwnerMessage();
                         break;
 
+                    case 10:// ObjectSpawnScene
+                        message = new ObjectSpawnSceneMessage();
+                        break;
+
                     case 12:// SpawnFinished
                         message = new ObjectSpawnFinishedMessage();
                         break;

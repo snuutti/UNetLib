@@ -134,6 +134,11 @@ public class NetworkReader
         return new NetworkInstanceId(ReadPackedUInt32());
     }
 
+    public NetworkSceneId ReadSceneId()
+    {
+        return new NetworkSceneId(ReadPackedUInt32());
+    }
+
     public NetworkHash128 ReadNetworkHash128()
     {
         var hash = new NetworkHash128
