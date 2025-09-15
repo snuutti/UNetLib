@@ -47,16 +47,4 @@ public class LLNetworkReader
     {
         return (uint) IPAddress.NetworkToHostOrder(_reader.ReadInt32());
     }
-
-    public ushort ReadMessageLength()
-    {
-        var firstByte = ReadByte();
-        if ((firstByte & 0x80) == 0)
-        {
-            return firstByte;
-        }
-
-        var secondByte = ReadByte();
-        return (ushort) (((secondByte & 0x7F) << 8) | firstByte);
-    }
 }

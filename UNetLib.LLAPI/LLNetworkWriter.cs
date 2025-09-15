@@ -42,18 +42,4 @@ public class LLNetworkWriter
     {
         _writer.Write((uint) IPAddress.HostToNetworkOrder((int) value));
     }
-
-    public void WriteMessageLength(ushort messageLength)
-    {
-        if (messageLength <= 0x7F)
-        {
-            Write((byte) messageLength);
-            return;
-        }
-
-        var high = (byte) (((messageLength >> 8) & 0x7F) | 0x80);
-        var low = (byte) (messageLength & 0xFF);
-        Write(high);
-        Write(low);
-    }
 }

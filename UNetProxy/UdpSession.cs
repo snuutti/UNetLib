@@ -129,8 +129,7 @@ public sealed class UdpSession : IDisposable
 
             var channelId = reader.ReadByte();
             var qosType = GetChannelType(channelId);
-            reader.ReadByte(); // some kind of delimiter maybe?
-            var length = reader.ReadMessageLength();
+            var length = reader.ReadUInt16();
 
             var messageId = reader.ReadUInt16();
 
