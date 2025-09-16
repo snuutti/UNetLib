@@ -17,6 +17,7 @@ public sealed class UdpSession : IDisposable
     private readonly ConnectionConfig _connectionConfig;
     private readonly CancellationTokenSource _cts;
     private readonly ProxySettings _settings;
+    private readonly SemaphoreSlim _logSemaphore = new(1, 1);
 
     public UdpSession(IPEndPoint clientEndPoint, IPEndPoint targetEndPoint, UdpClient clientListener,
         ConnectionConfig connectionConfig, CancellationTokenSource parentCts, ProxySettings settings)
@@ -55,31 +56,40 @@ public sealed class UdpSession : IDisposable
 
     public async Task OnPacketReceived(byte[] buffer, bool fromClient)
     {
-        if (fromClient)
-        {
-            try
-            {
-                LogPacket(buffer, _clientEndPoint, _targetEndPoint, true);
-            }
-            catch (Exception e)
-            {
-                AnsiConsole.WriteException(e);
-            }
+        await _logSemaphore.WaitAsync(_cts.Token);
 
-            await _forwardingClient.SendAsync(buffer, buffer.Length);
+        try
+        {
+            if (fromClient)
+            {
+                try
+                {
+                    LogPacket(buffer, _clientEndPoint, _targetEndPoint, true);
+                }
+                catch (Exception e)
+                {
+                    AnsiConsole.WriteException(e);
+                }
+
+                await _forwardingClient.SendAsync(buffer, buffer.Length);
+            }
+            else
+            {
+                try
+                {
+                    LogPacket(buffer, _targetEndPoint, _clientEndPoint, false);
+                }
+                catch (Exception e)
+                {
+                    AnsiConsole.WriteException(e);
+                }
+
+                await _clientListener.SendAsync(buffer, buffer.Length, _clientEndPoint);
+            }
         }
-        else
+        finally
         {
-            try
-            {
-                LogPacket(buffer, _targetEndPoint, _clientEndPoint, false);
-            }
-            catch (Exception e)
-            {
-                AnsiConsole.WriteException(e);
-            }
-
-            await _clientListener.SendAsync(buffer, buffer.Length, _clientEndPoint);
+            _logSemaphore.Release();
         }
     }
 
@@ -87,6 +97,7 @@ public sealed class UdpSession : IDisposable
     {
         _cts.Dispose();
         _forwardingClient.Dispose();
+        _logSemaphore.Dispose();
     }
 
     private void LogPacket(byte[] buffer, IPEndPoint from, IPEndPoint to, bool fromClient)
