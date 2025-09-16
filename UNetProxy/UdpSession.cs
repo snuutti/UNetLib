@@ -157,8 +157,9 @@ public sealed class UdpSession : IDisposable
                 var size = hlapiReader.ReadUInt16();
                 var msgType = hlapiReader.ReadInt16();
                 var msgBuffer = hlapiReader.ReadBytes(size);
+                var msgReader = new NetworkReader(msgBuffer);
 
-                IMessageBase message;
+                IMessageBase? message = null;
                 switch (msgType)
                 {
                     case 1:// ObjectDestroy
@@ -173,12 +174,35 @@ public sealed class UdpSession : IDisposable
                         message = new OwnerMessage();
                         break;
 
+                    case 5:// Command
+                        {
+                            var cmdHash = (int) msgReader.ReadPackedUInt32();
+                            var netId = msgReader.ReadNetworkId();
+                            var cmdBuffer = msgReader.ReadBytes((int) (msgReader.Length - msgReader.Position));
+
+                            AnsiConsole.WriteLine($"  Server Command: CmdHash={cmdHash}, NetId={netId}, CmdBuffer={BitConverter.ToString(cmdBuffer)}");
+                        }
+                        break;
+
+                    case 8:// UpdateVars
+                        {
+                            var netId = msgReader.ReadNetworkId();
+                            var varBuffer = msgReader.ReadBytes((int) (msgReader.Length - msgReader.Position));
+
+                            AnsiConsole.WriteLine($"  UpdateVars: NetId={netId}, VarBuffer={BitConverter.ToString(varBuffer)}");
+                        }
+                        break;
+
                     case 10:// ObjectSpawnScene
                         message = new ObjectSpawnSceneMessage();
                         break;
 
                     case 12:// SpawnFinished
                         message = new ObjectSpawnFinishedMessage();
+                        break;
+
+                    case 13:// ObjectHide
+                        message = new ObjectDestroyMessage();
                         break;
 
                     case 14:// CRC
@@ -222,7 +246,11 @@ public sealed class UdpSession : IDisposable
                         continue;
                 }
 
-                var msgReader = new NetworkReader(msgBuffer);
+                if (message == null)
+                {
+                    continue;
+                }
+
                 message.Deserialize(msgReader);
                 AnsiConsole.WriteLine($"  HLAPI Message: {message}");
             }
