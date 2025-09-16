@@ -148,7 +148,7 @@ public sealed class UdpSession : IDisposable
             var payloadLength = length - headerLength;
             var payload = reader.ReadBytes(payloadLength);
 
-            AnsiConsole.MarkupLine($"[green][[{DateTime.Now:HH:mm:ss}]] {direction} (User Packet) From {from} To {to} ({buffer.Length} bytes)[/]\n{ackPacket}");
+            AnsiConsole.MarkupLine($"[green][[{DateTime.Now:HH:mm:ss}]] {direction} (User Packet) From {from} To {to} ({buffer.Length} bytes)[/]\n{ackPacket}, ChannelId={channelId}/{qosType}");
 
             var hlapiReader = new NetworkReader(payload);
 
