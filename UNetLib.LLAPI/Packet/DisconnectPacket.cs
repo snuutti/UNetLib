@@ -1,5 +1,8 @@
 namespace UNetLib.LLAPI.Packet;
 
+/// <summary>
+/// Sent by either the client or server to terminate a connection.
+/// </summary>
 public class DisconnectPacket : SystemPacket
 {
     public uint LibVersion { get; set; }
