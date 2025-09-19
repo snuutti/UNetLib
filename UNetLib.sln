@@ -6,6 +6,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UNetProxy", "UNetProxy\UNet
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UNetLib.HLAPI", "UNetLib.HLAPI\UNetLib.HLAPI.csproj", "{78C634E7-7D0A-4B67-9A41-5E15DF13B938}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UNetLib.LLAPI.Tests", "UNetLib.LLAPI.Tests\UNetLib.LLAPI.Tests.csproj", "{3FBF99D3-4C5C-48FA-BDCD-6EFDD4EF4DE1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UNetLib.HLAPI.Tests", "UNetLib.HLAPI.Tests\UNetLib.HLAPI.Tests.csproj", "{71A2D07A-0384-475C-8108-850ED65A4E90}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +28,13 @@ Global
 		{78C634E7-7D0A-4B67-9A41-5E15DF13B938}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78C634E7-7D0A-4B67-9A41-5E15DF13B938}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78C634E7-7D0A-4B67-9A41-5E15DF13B938}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FBF99D3-4C5C-48FA-BDCD-6EFDD4EF4DE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FBF99D3-4C5C-48FA-BDCD-6EFDD4EF4DE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FBF99D3-4C5C-48FA-BDCD-6EFDD4EF4DE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FBF99D3-4C5C-48FA-BDCD-6EFDD4EF4DE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71A2D07A-0384-475C-8108-850ED65A4E90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71A2D07A-0384-475C-8108-850ED65A4E90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71A2D07A-0384-475C-8108-850ED65A4E90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71A2D07A-0384-475C-8108-850ED65A4E90}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

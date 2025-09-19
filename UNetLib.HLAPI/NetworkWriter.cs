@@ -16,6 +16,11 @@ public class NetworkWriter
         _writer = new BinaryWriter(_stream);
     }
 
+    public byte[] ToArray()
+    {
+        return _stream.ToArray();
+    }
+
     public void Write(byte value)
     {
         _writer.Write(value);
