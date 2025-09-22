@@ -28,7 +28,7 @@ public class PingPacket : SystemPacket
     /// </summary>
     public byte ExtDropRate { get; set; }
     /// <summary>
-    /// This is a random ping specific session ID that is different on both client and server.
+    /// This is a byte-swapped version of the remote session ID.
     /// </summary>
     public ushort RemoteSessionId { get; set; }
 
