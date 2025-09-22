@@ -5,6 +5,7 @@ using UNetLib.HLAPI;
 using UNetLib.HLAPI.Messages;
 using UNetLib.LLAPI;
 using UNetLib.LLAPI.Packet;
+using UNetLib.LLAPI.Utils;
 
 namespace UNetProxy;
 
@@ -139,18 +140,18 @@ public sealed class UdpSession : IDisposable
             }
 
             var channelId = reader.ReadByte();
-            var qosType = GetChannelType(channelId);
+            var qosType = _connectionConfig.GetChannelType(channelId);
             var length = reader.ReadUInt16();
 
             var headerLength = 3;
 
-            if (IsChannelReliable(qosType))
+            if (ChannelUtils.IsChannelReliable(qosType))
             {
                 var messageId = reader.ReadUInt16();
                 headerLength += 2;
             }
 
-            if (IsChannelSequenced(qosType))
+            if (ChannelUtils.IsChannelSequenced(qosType))
             {
                 var orderedMessageId = reader.ReadByte();
                 headerLength += 1;
@@ -298,26 +299,5 @@ public sealed class UdpSession : IDisposable
 
         systemPacket.Deserialize(reader);
         AnsiConsole.MarkupLine($"[blue][[{DateTime.Now:HH:mm:ss}]] {direction} ({requestType}) From {from} To {to} ({buffer.Length} bytes)[/]\n{systemPacket}");
-    }
-
-    private QosType GetChannelType(byte channelId)
-    {
-        if (channelId >= _connectionConfig.Channels.Count)
-        {
-            return QosType.Unreliable;
-        }
-
-        return _connectionConfig.Channels[channelId];
-    }
-
-    private static bool IsChannelReliable(QosType qosType)
-    {
-        return qosType is QosType.Reliable or QosType.ReliableFragmented or QosType.ReliableSequenced
-            or QosType.ReliableStateUpdate or QosType.AllCostDelivery;
-    }
-
-    private static bool IsChannelSequenced(QosType qosType)
-    {
-        return qosType is QosType.UnreliableSequenced or QosType.ReliableSequenced;
     }
 }
