@@ -144,23 +144,26 @@ public sealed class UdpSession : IDisposable
             var length = reader.ReadUInt16();
 
             var headerLength = 3;
+            var extraInfo = "";
 
             if (ChannelUtils.IsChannelReliable(qosType))
             {
                 var messageId = reader.ReadUInt16();
                 headerLength += 2;
+                extraInfo = $", MessageId={messageId}";
             }
 
             if (ChannelUtils.IsChannelSequenced(qosType))
             {
                 var orderedMessageId = reader.ReadByte();
                 headerLength += 1;
+                extraInfo += $", OrderedMessageId={orderedMessageId}";
             }
 
             var payloadLength = length - headerLength;
             var payload = reader.ReadBytes(payloadLength);
 
-            AnsiConsole.MarkupLine($"[green][[{DateTime.Now:HH:mm:ss}]] {direction} (User Packet) From {from} To {to} ({buffer.Length} bytes)[/]\n{ackPacket}, ChannelId={channelId}/{qosType}");
+            AnsiConsole.MarkupLine($"[green][[{DateTime.Now:HH:mm:ss}]] {direction} (User Packet) From {from} To {to} ({buffer.Length} bytes)[/]\n{ackPacket}, ChannelId={channelId}/{qosType}{extraInfo}");
 
             var hlapiReader = new NetworkReader(payload);
 
