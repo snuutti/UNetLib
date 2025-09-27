@@ -140,6 +140,12 @@ public sealed class UdpSession : IDisposable
             }
 
             var channelId = reader.ReadByte();
+            if (channelId >= _connectionConfig.Channels.Count)
+            {
+                AnsiConsole.MarkupLine($"[red][[{DateTime.Now:HH:mm:ss}]] {direction} (Invalid ChannelId={channelId}) From {from} To {to} ({buffer.Length} bytes)[/]\n{ackPacket}");
+                return;
+            }
+
             var qosType = _connectionConfig.GetChannelType(channelId);
             var length = reader.ReadUInt16();
 
