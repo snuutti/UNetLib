@@ -23,6 +23,12 @@ public class ProxyCommand : AsyncCommand<ProxySettings>
             return 1;
         }
 
+        AnsiConsole.WriteLine("Channels:");
+        foreach (var channel in settings.Channels)
+        {
+            AnsiConsole.WriteLine($" - {channel}");
+        }
+
         var connectionConfig = new ConnectionConfig
         {
             IsAcksLong = settings.LongAcks,
