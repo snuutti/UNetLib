@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Sockets;
 using UNetLib.LLAPI;
 using UNetLib.LLAPI.Packet;
-using UNetLib.LLAPI.Utils;
 
 namespace UNetLib;
 
@@ -26,6 +25,8 @@ public class UNetServer
     public bool IsRunning { get; private set; }
 
     public ConnectionConfig Config => _config;
+
+    internal IUNetEventListener EventListener => _eventListener;
 
     public UNetServer(ConnectionConfig config, IUNetEventListener eventListener)
     {
@@ -182,51 +183,15 @@ public class UNetServer
             acks[0] = reader.ReadUInt32();
         }
 
+        // TODO: Process acks
+
         if (reader.IsAtEnd)
         {
             // Ack only packet
             return;
         }
 
-        var channelId = reader.ReadByte();
-        var qosType = _config.GetChannelType(channelId);
-        var length = reader.ReadUInt16();
-
-        var headerLength = 3;
-        ushort? messageId = null;
-        byte? orderedMessageId = null;
-
-        if (ChannelUtils.IsChannelReliable(qosType))
-        {
-            messageId = reader.ReadUInt16();
-            headerLength += 2;
-        }
-
-        if (ChannelUtils.IsChannelSequenced(qosType))
-        {
-            orderedMessageId = reader.ReadByte();
-            headerLength += 1;
-        }
-
-        var payloadLength = length - headerLength;
-        if (payloadLength < 0 || reader.Position + payloadLength > reader.Length)
-        {
-            Console.WriteLine($"Invalid payload length {payloadLength} from {remoteEndPoint}!");
-            return;
-        }
-
-        var payload = reader.ReadBytes(payloadLength);
-
-        switch (qosType)
-        {
-            case QosType.Unreliable:
-                _eventListener.OnNetworkReceive(client, new ArraySegment<byte>(payload), channelId);
-                break;
-
-            default:
-                Console.WriteLine($"Unsupported QoS type {qosType} from {remoteEndPoint}!");
-                break;
-        }
+        client.ProcessDataPacket(reader);
     }
 
     private void HandleConnectRequest(ConnectPacket packet, IPEndPoint remoteEndPoint)

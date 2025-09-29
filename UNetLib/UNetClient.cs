@@ -1,4 +1,5 @@
 using System.Net;
+using UNetLib.Channel;
 using UNetLib.LLAPI;
 using UNetLib.LLAPI.Packet;
 using UNetLib.LLAPI.Utils;
@@ -19,6 +20,8 @@ public class UNetClient
 
     private readonly ushort _pingSessionId;
 
+    private readonly BaseChannel[] _channels;
+
     private ushort _nextPacketId;
 
     private ushort _nextMessageId;
@@ -29,6 +32,8 @@ public class UNetClient
 
     public ushort ConnectionId => _connectionId;
 
+    internal IUNetEventListener EventListener => _server.EventListener;
+
     public UNetClient(UNetServer server, IPEndPoint remoteEndPoint, ushort connectionId, ushort remoteConnectionId,
         ushort sessionId, ushort remoteSessionId)
     {
@@ -38,11 +43,45 @@ public class UNetClient
         _remoteConnectionId = remoteConnectionId;
         _sessionId = sessionId;
         _pingSessionId = ConnectionUtils.CalculateRemoteSessionId(remoteSessionId);
+        _channels = new BaseChannel[server.Config.Channels.Count];
+
+        for (byte i = 0; i < _channels.Length; i++)
+        {
+            var qosType = server.Config.GetChannelType(i);
+            _channels[i] = qosType switch
+            {
+                QosType.Unreliable => new UnreliableChannel(this, i),
+                QosType.UnreliableSequenced => new UnreliableSequencedChannel(this, i),
+                _ => throw new NotSupportedException($"QosType {qosType} is not supported!")
+            };
+        }
     }
 
     internal void ProcessPing(PingPacket incomingPing)
     {
         SendPing(incomingPing);
+    }
+
+    internal void ProcessDataPacket(LLNetworkReader reader)
+    {
+        var channelId = reader.ReadByte();
+        if (channelId >= _channels.Length)
+        {
+            Console.WriteLine($"Invalid channel ID {channelId} from {_remoteEndPoint}!");
+            return;
+        }
+
+        _channels[channelId].Process(reader);
+    }
+
+    internal ushort NextPacketId()
+    {
+        return _nextPacketId++;
+    }
+
+    internal ushort NextMessageId()
+    {
+        return _nextMessageId++;
     }
 
     public void Send(byte[] data)
@@ -65,7 +104,7 @@ public class UNetClient
     private void BuildPacket(LLNetworkWriter writer, byte channelId, byte[]? data)
     {
         writer.Write(_connectionId);
-        writer.Write(_nextPacketId);
+        writer.Write(NextPacketId());
         writer.Write(_sessionId);
         writer.Write((ushort) 0); // TODO: AckMessageId
         writer.Write([0xFF, 0xFF, 0xFF, 0xFF]); // TODO: Acks
@@ -82,36 +121,8 @@ public class UNetClient
 
         writer.Write(channelId);
 
-        var messageLength = (ushort) data.Length;
-        var qosType = _server.Config.GetChannelType(channelId);
-        var isReliable = ChannelUtils.IsChannelReliable(qosType);
-        var isSequenced = ChannelUtils.IsChannelSequenced(qosType);
-
-        if (isReliable)
-        {
-            messageLength += 2;
-        }
-
-        if (isSequenced)
-        {
-            messageLength += 1;
-        }
-
-        writer.Write(messageLength);
-
-        if (isReliable)
-        {
-            writer.Write(_nextMessageId);
-        }
-
-        if (isSequenced)
-        {
-            writer.Write(0); // TODO: OrderedMessageId
-        }
-
-        writer.Write(data);
-        _nextPacketId++;
-        _nextMessageId++;
+        _channels[channelId].Prepare(writer, data);
+        Send(writer);
     }
 
     internal void SendPing(PingPacket? incomingPing = null)
@@ -120,7 +131,7 @@ public class UNetClient
         {
             ConnectionId = 0,
             RequestType = SystemPacket.SystemRequestType.Ping,
-            PacketId = _nextPacketId,
+            PacketId = NextPacketId(),
             SessionId = _sessionId,
             LocalConnectionId = _connectionId,
             RemoteConnectionId = _remoteConnectionId,
@@ -131,8 +142,6 @@ public class UNetClient
             ExtDropRate = 0,// TODO
             RemoteSessionId = _pingSessionId
         };
-
-        _nextPacketId++;
 
         var writer = new LLNetworkWriter();
         packet.Serialize(writer);
