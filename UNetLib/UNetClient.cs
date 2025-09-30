@@ -22,15 +22,21 @@ public class UNetClient
 
     private readonly BaseChannel[] _channels;
 
+    private readonly PacketAcks _packetAcks;
+
+    private readonly Dictionary<ushort, (byte channelId, byte[] data)> _pendingReliableMessages = new();
+
     private ushort _nextPacketId;
 
-    private ushort _nextMessageId;
+    private ushort _nextMessageId = 1;
 
     public ConnectionState State { get; set; }
 
     public IPEndPoint RemoteEndPoint => _remoteEndPoint;
 
     public ushort ConnectionId => _connectionId;
+
+    internal PacketAcks PacketAcks => _packetAcks;
 
     internal IUNetEventListener EventListener => _server.EventListener;
 
@@ -52,9 +58,13 @@ public class UNetClient
             {
                 QosType.Unreliable => new UnreliableChannel(this, i),
                 QosType.UnreliableSequenced => new UnreliableSequencedChannel(this, i),
+                QosType.Reliable => new ReliableChannel(this, i),
+                QosType.ReliableSequenced => new ReliableSequencedChannel(this, i),
                 _ => throw new NotSupportedException($"QosType {qosType} is not supported!")
             };
         }
+
+        _packetAcks = new PacketAcks(server.Config.IsAcksLong);
     }
 
     internal void ProcessPing(PingPacket incomingPing)
@@ -72,6 +82,56 @@ public class UNetClient
         }
 
         _channels[channelId].Process(reader);
+    }
+
+    internal void StoreReliableMessage(ushort messageId, byte channelId, byte[] data)
+    {
+        _pendingReliableMessages[messageId] = (channelId, data);
+    }
+
+    internal void ProcessAcks(ushort ackMessageId, uint[] acks)
+    {
+        var (messageIdsToResend, receivedIds) = _packetAcks.ReadIncomingAcks(ackMessageId, acks);
+
+        foreach (var receivedId in receivedIds)
+        {
+            _pendingReliableMessages.Remove(receivedId);
+        }
+
+        if (messageIdsToResend.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var messageId in messageIdsToResend)
+        {
+            if (_pendingReliableMessages.TryGetValue(messageId, out var message))
+            {
+                ResendPacket(message.channelId, message.data);
+            }
+        }
+    }
+
+    private void ResendPacket(byte channelId, byte[] data)
+    {
+        var writer = new LLNetworkWriter();
+
+        WritePacketHeader(writer);
+
+        writer.Write(channelId);
+        writer.Write(data);
+
+        Send(writer);
+    }
+
+    internal void SendAcks()
+    {
+        for (var i = 0; i < 3; i++)
+        {
+            var writer = new LLNetworkWriter();
+            BuildPacket(writer, 0, null);
+            Send(writer);
+        }
     }
 
     internal ushort NextPacketId()
@@ -101,18 +161,25 @@ public class UNetClient
         Send(writer);
     }
 
-    private void BuildPacket(LLNetworkWriter writer, byte channelId, byte[]? data)
+    private void WritePacketHeader(LLNetworkWriter writer)
     {
         writer.Write(_connectionId);
         writer.Write(NextPacketId());
         writer.Write(_sessionId);
-        writer.Write((ushort) 0); // TODO: AckMessageId
-        writer.Write([0xFF, 0xFF, 0xFF, 0xFF]); // TODO: Acks
+
+        var (lastReceivedMessageId, acks) = _packetAcks.GetAcks();
+        writer.Write(lastReceivedMessageId);
+        writer.Write(acks[0]);
 
         if (_server.Config.IsAcksLong)
         {
-            writer.Write([0xFF, 0xFF, 0xFF, 0xFF]);
+            writer.Write(acks[1]);
         }
+    }
+
+    private void BuildPacket(LLNetworkWriter writer, byte channelId, byte[]? data)
+    {
+        WritePacketHeader(writer);
 
         if (data == null || data.Length == 0)
         {
@@ -122,7 +189,6 @@ public class UNetClient
         writer.Write(channelId);
 
         _channels[channelId].Prepare(writer, data);
-        Send(writer);
     }
 
     internal void SendPing(PingPacket? incomingPing = null)
