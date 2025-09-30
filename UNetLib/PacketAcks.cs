@@ -35,18 +35,24 @@ internal class PacketAcks
         return true;
     }
 
-    public List<ushort> ReadIncomingAcks(ushort ackMessageId, uint[] acks)
+    public (List<ushort> messageIdsToResend, List<ushort> receivedIds) ReadIncomingAcks(ushort ackMessageId, uint[] acks)
     {
         var messageIdsToResend = new List<ushort>();
+        var receivedIds = new List<ushort>();
 
         if (!_acksLong)
         {
             var mask = acks[0];
             for (var i = 0; i < 32; i++)
             {
+                var messageId = (ushort) (ackMessageId - i);
                 if ((mask & (1u << i)) == 0)
                 {
-                    messageIdsToResend.Add((ushort) (ackMessageId - i));
+                    messageIdsToResend.Add(messageId);
+                }
+                else
+                {
+                    receivedIds.Add(messageId);
                 }
             }
         }
@@ -55,7 +61,7 @@ internal class PacketAcks
             throw new NotImplementedException();
         }
 
-        return messageIdsToResend;
+        return (messageIdsToResend, receivedIds);
     }
 
     public (ushort lastReceivedMessageId, uint[] acks) GetAcks()

@@ -26,9 +26,18 @@ internal sealed class ReliableChannel : BaseChannel
 
     public override void Prepare(LLNetworkWriter writer, byte[] data)
     {
+        var messageId = Client.NextMessageId();
+
+        var payloadWriter = new LLNetworkWriter();
+
         var length = data.Length + 5;
-        writer.Write((ushort) length);
-        writer.Write(Client.NextMessageId());
-        writer.Write(data);
+        payloadWriter.Write((ushort) length);
+        payloadWriter.Write(messageId);
+        payloadWriter.Write(data);
+
+        var payload = payloadWriter.ToArray();
+        writer.Write(payload);
+
+        Client.StoreReliableMessage(messageId, ChannelId, payload);
     }
 }

@@ -24,6 +24,8 @@ public class UNetClient
 
     private readonly PacketAcks _packetAcks;
 
+    private readonly Dictionary<ushort, (byte channelId, byte[] data)> _pendingReliableMessages = new();
+
     private ushort _nextPacketId;
 
     private ushort _nextMessageId = 1;
@@ -81,10 +83,44 @@ public class UNetClient
         _channels[channelId].Process(reader);
     }
 
+    internal void StoreReliableMessage(ushort messageId, byte channelId, byte[] data)
+    {
+        _pendingReliableMessages[messageId] = (channelId, data);
+    }
+
     internal void ProcessAcks(ushort ackMessageId, uint[] acks)
     {
-        var messageIdsToResend = _packetAcks.ReadIncomingAcks(ackMessageId, acks);
-        Console.WriteLine($"Resend: {string.Join(", ", messageIdsToResend)}");
+        var (messageIdsToResend, receivedIds) = _packetAcks.ReadIncomingAcks(ackMessageId, acks);
+
+        foreach (var receivedId in receivedIds)
+        {
+            _pendingReliableMessages.Remove(receivedId);
+        }
+
+        if (messageIdsToResend.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var messageId in messageIdsToResend)
+        {
+            if (_pendingReliableMessages.TryGetValue(messageId, out var message))
+            {
+                ResendPacket(message.channelId, message.data);
+            }
+        }
+    }
+
+    private void ResendPacket(byte channelId, byte[] data)
+    {
+        var writer = new LLNetworkWriter();
+
+        WritePacketHeader(writer);
+
+        writer.Write(channelId);
+        writer.Write(data);
+
+        Send(writer);
     }
 
     internal void SendAcks()
@@ -124,7 +160,7 @@ public class UNetClient
         Send(writer);
     }
 
-    private void BuildPacket(LLNetworkWriter writer, byte channelId, byte[]? data)
+    private void WritePacketHeader(LLNetworkWriter writer)
     {
         writer.Write(_connectionId);
         writer.Write(NextPacketId());
@@ -138,6 +174,11 @@ public class UNetClient
         {
             writer.Write(acks[1]);
         }
+    }
+
+    private void BuildPacket(LLNetworkWriter writer, byte channelId, byte[]? data)
+    {
+        WritePacketHeader(writer);
 
         if (data == null || data.Length == 0)
         {
