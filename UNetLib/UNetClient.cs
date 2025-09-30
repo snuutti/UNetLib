@@ -59,6 +59,7 @@ public class UNetClient
                 QosType.Unreliable => new UnreliableChannel(this, i),
                 QosType.UnreliableSequenced => new UnreliableSequencedChannel(this, i),
                 QosType.Reliable => new ReliableChannel(this, i),
+                QosType.ReliableSequenced => new ReliableSequencedChannel(this, i),
                 _ => throw new NotSupportedException($"QosType {qosType} is not supported!")
             };
         }
