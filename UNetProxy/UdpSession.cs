@@ -183,19 +183,19 @@ public sealed class UdpSession : IDisposable
                 IMessageBase? message = null;
                 switch (msgType)
                 {
-                    case 1:// ObjectDestroy
+                    case MsgType.ObjectDestroy:
                         message = new ObjectDestroyMessage();
                         break;
 
-                    case 3:// ObjectSpawn
+                    case MsgType.ObjectSpawn:
                         message = new ObjectSpawnMessage();
                         break;
 
-                    case 4:// Owner
+                    case MsgType.Owner:
                         message = new OwnerMessage();
                         break;
 
-                    case 5:// Command
+                    case MsgType.Command:
                         {
                             var cmdHash = (int) msgReader.ReadPackedUInt32();
                             var netId = msgReader.ReadNetworkId();
@@ -205,7 +205,7 @@ public sealed class UdpSession : IDisposable
                         }
                         break;
 
-                    case 8:// UpdateVars
+                    case MsgType.UpdateVars:
                         {
                             var netId = msgReader.ReadNetworkId();
                             var varBuffer = msgReader.ReadBytes((int) (msgReader.Length - msgReader.Position));
@@ -214,55 +214,55 @@ public sealed class UdpSession : IDisposable
                         }
                         break;
 
-                    case 10:// ObjectSpawnScene
+                    case MsgType.ObjectSpawnScene:
                         message = new ObjectSpawnSceneMessage();
                         break;
 
-                    case 12:// SpawnFinished
+                    case MsgType.SpawnFinished:
                         message = new ObjectSpawnFinishedMessage();
                         break;
 
-                    case 13:// ObjectHide
+                    case MsgType.ObjectHide:
                         message = new ObjectDestroyMessage();
                         break;
 
-                    case 14:// CRC
+                    case MsgType.CRC:
                         message = new CrcMessage();
                         break;
 
-                    case 34:// Error
+                    case MsgType.Error:
                         message = new ErrorMessage();
                         break;
 
-                    case 35:// Ready
+                    case MsgType.Ready:
                         message = new ReadyMessage();
                         break;
 
-                    case 36:// NotReady
+                    case MsgType.NotReady:
                         message = new NotReadyMessage();
                         break;
 
-                    case 37:// AddPlayer
+                    case MsgType.AddPlayer:
                         message = new AddPlayerMessage();
                         break;
 
-                    case 38:// RemovePlayer
+                    case MsgType.RemovePlayer:
                         message = new RemovePlayerMessage();
                         break;
 
-                    case 39:// Scene
+                    case MsgType.Scene:
                         message = new StringMessage();
                         break;
 
-                    case 43:// LobbyReadyToBegin
+                    case MsgType.LobbyReadyToBegin:
                         message = new LobbyReadyToBeginMessage();
                         break;
 
-                    case 44:// LobbySceneLoaded
+                    case MsgType.LobbySceneLoaded:
                         message = new IntegerMessage();
                         break;
 
-                    case 45:// LobbyAddPlayerFailed
+                    case MsgType.LobbyAddPlayerFailed:
                         message = new EmptyMessage();
                         break;
 
