@@ -1,5 +1,7 @@
 using System.Net;
 using UNetLib.Channel;
+using UNetLib.HLAPI;
+using UNetLib.HLAPI.Messages;
 using UNetLib.LLAPI;
 using UNetLib.LLAPI.Packet;
 using UNetLib.LLAPI.Utils;
@@ -165,6 +167,31 @@ public class UNetClient
         var writer = new LLNetworkWriter();
         BuildPacket(writer, channelId, data);
         Send(writer);
+    }
+
+    public void SendReliable(short type, IMessageBase message)
+    {
+        SendByChannel(type, message, Channels.DefaultReliable);
+    }
+
+    public void SendUnreliable(short type, IMessageBase message)
+    {
+        SendByChannel(type, message, Channels.DefaultUnreliable);
+    }
+
+    public void SendByChannel(short type, IMessageBase message, byte channelId)
+    {
+        var msgWriter = new NetworkWriter();
+        message.Serialize(msgWriter);
+        var msgBuffer = msgWriter.ToArray();
+        var size = (ushort) msgBuffer.Length;
+
+        var writer = new NetworkWriter();
+        writer.Write(size);
+        writer.Write(type);
+        writer.Write(msgBuffer);
+
+        SendByChannel(writer.ToArray(), channelId);
     }
 
     public void Disconnect(DisconnectPacket.DisconnectReason reason = DisconnectPacket.DisconnectReason.Ok)
