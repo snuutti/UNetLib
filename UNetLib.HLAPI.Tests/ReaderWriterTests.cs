@@ -56,6 +56,23 @@ public class ReaderWriterTests
     }
 
     [Test]
+    public async Task ReadWrite_Int16_IsSymmetrical()
+    {
+        // Arrange
+        var writer = new NetworkWriter();
+        const short originalValue = 12345;
+
+        // Act
+        writer.Write(originalValue);
+        var buffer = writer.ToArray();
+        var reader = new NetworkReader(buffer);
+        var readValue = reader.ReadInt16();
+
+        // Assert
+        await Assert.That(readValue).IsEqualTo(originalValue);
+    }
+
+    [Test]
     public async Task ReadWrite_UInt16_IsSymmetrical()
     {
         // Arrange

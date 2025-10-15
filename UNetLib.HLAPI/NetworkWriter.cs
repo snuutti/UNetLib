@@ -36,6 +36,11 @@ public class NetworkWriter
         _writer.Write(value);
     }
 
+    public void Write(short value)
+    {
+        _writer.Write(value);
+    }
+
     public void Write(ushort value)
     {
         _writer.Write(value);
