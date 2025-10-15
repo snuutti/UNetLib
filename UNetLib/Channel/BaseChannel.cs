@@ -6,12 +6,12 @@ internal abstract class BaseChannel
 {
     protected readonly UNetClient Client;
 
-    private readonly byte _channelId;
+    protected readonly byte ChannelId;
 
     protected BaseChannel(UNetClient client, byte channelId)
     {
         Client = client;
-        _channelId = channelId;
+        ChannelId = channelId;
     }
 
     public abstract void Process(LLNetworkReader reader);
@@ -27,6 +27,6 @@ internal abstract class BaseChannel
         }
 
         var payload = reader.ReadBytes(length);
-        Client.EventListener.OnNetworkReceive(Client, new ArraySegment<byte>(payload), _channelId);
+        Client.EventListener.OnNetworkReceive(Client, new ArraySegment<byte>(payload), ChannelId);
     }
 }

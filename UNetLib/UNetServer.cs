@@ -183,7 +183,7 @@ public class UNetServer
             acks[0] = reader.ReadUInt32();
         }
 
-        // TODO: Process acks
+        client.ProcessAcks(ackMessageId, acks);
 
         if (reader.IsAtEnd)
         {
