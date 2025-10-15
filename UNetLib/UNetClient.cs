@@ -167,6 +167,11 @@ public class UNetClient
         Send(writer);
     }
 
+    public void Disconnect(DisconnectPacket.DisconnectReason reason = DisconnectPacket.DisconnectReason.Ok)
+    {
+        _server.Disconnect(this, reason);
+    }
+
     private void WritePacketHeader(LLNetworkWriter writer)
     {
         writer.Write(_connectionId);
