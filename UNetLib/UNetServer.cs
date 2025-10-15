@@ -209,7 +209,6 @@ public class UNetServer
         _clients[remoteEndPoint] = client;
 
         client.SendPing();
-        _eventListener.OnClientConnected(client);
     }
 
     public void Disconnect(UNetClient client, DisconnectPacket.DisconnectReason reason)

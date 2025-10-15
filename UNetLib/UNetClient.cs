@@ -69,6 +69,12 @@ public class UNetClient
 
     internal void ProcessPing(PingPacket incomingPing)
     {
+        if (State == ConnectionState.Handshake)
+        {
+            State = ConnectionState.Connected;
+            EventListener.OnClientConnected(this);
+        }
+
         SendPing(incomingPing);
     }
 
@@ -235,6 +241,7 @@ public class UNetClient
 
     public enum ConnectionState
     {
+        Handshake,
         Connected,
         Disconnected
     }
