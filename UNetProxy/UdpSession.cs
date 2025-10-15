@@ -230,6 +230,10 @@ public sealed class UdpSession : IDisposable
                         message = new CrcMessage();
                         break;
 
+                    case 34:// Error
+                        message = new ErrorMessage();
+                        break;
+
                     case 35:// Ready
                         message = new ReadyMessage();
                         break;
