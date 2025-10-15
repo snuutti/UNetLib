@@ -29,6 +29,15 @@ public class CrcMessage : IMessageBase
         }
     }
 
+    public void AddScript(string name, byte channel)
+    {
+        Scripts.Add(new CrcMessageEntry
+        {
+            Name = name,
+            Channel = channel
+        });
+    }
+
     public override string ToString()
     {
         return $"CrcMessage(Scripts={string.Join(",", Scripts.Select(s => $"{s.Name}:{s.Channel}"))})";
