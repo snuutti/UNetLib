@@ -82,14 +82,17 @@ public class UNetClient
 
     internal void ProcessDataPacket(LLNetworkReader reader)
     {
-        var channelId = reader.ReadByte();
-        if (channelId >= _channels.Length)
+        while (reader.Position < reader.Length)
         {
-            Console.WriteLine($"Invalid channel ID {channelId} from {_remoteEndPoint}!");
-            return;
-        }
+            var channelId = reader.ReadByte();
+            if (channelId >= _channels.Length)
+            {
+                Console.WriteLine($"Invalid channel ID {channelId} from {_remoteEndPoint}!");
+                return;
+            }
 
-        _channels[channelId].Process(reader);
+            _channels[channelId].Process(reader);
+        }
     }
 
     internal void StoreReliableMessage(ushort messageId, byte channelId, byte[] data)
