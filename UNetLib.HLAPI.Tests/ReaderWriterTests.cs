@@ -214,7 +214,7 @@ public class ReaderWriterTests
         // Arrange
         var writer = new NetworkWriter();
         var guid = Guid.NewGuid();
-        var originalValue = NetworkHash128.Parse(guid.ToString("N"));
+        var originalValue = NetworkHash128.Parse(guid);
 
         // Act
         writer.Write(originalValue);

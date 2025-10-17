@@ -64,6 +64,11 @@ public struct NetworkHash128
         return 0;
     }
 
+    public static NetworkHash128 Parse(Guid guid)
+    {
+        return Parse(guid.ToString("N"));
+    }
+
     public static NetworkHash128 Parse(string text)
     {
         NetworkHash128 hash;
