@@ -59,6 +59,11 @@ public class NetworkReader
         return _reader.ReadSingle();
     }
 
+    public double ReadDouble()
+    {
+        return _reader.ReadDouble();
+    }
+
     public uint ReadPackedUInt32()
     {
         var a0 = ReadByte();

@@ -51,6 +51,11 @@ public class NetworkWriter
         _writer.Write(value);
     }
 
+    public void Write(double value)
+    {
+        _writer.Write(value);
+    }
+
     public void Write(string? value)
     {
         if (value == null)

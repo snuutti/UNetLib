@@ -107,6 +107,23 @@ public class ReaderWriterTests
     }
 
     [Test]
+    public async Task ReadWrite_Double_IsSymmetrical()
+    {
+        // Arrange
+        var writer = new NetworkWriter();
+        const double originalValue = 123.456789;
+
+        // Act
+        writer.Write(originalValue);
+        var buffer = writer.ToArray();
+        var reader = new NetworkReader(buffer);
+        var readValue = reader.ReadDouble();
+
+        // Assert
+        await Assert.That(readValue).IsEqualTo(originalValue);
+    }
+
+    [Test]
     public async Task ReadWrite_PackedUInt32_IsSymmetrical()
     {
         // Arrange
