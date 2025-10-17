@@ -63,6 +63,8 @@ public class UNetClient
                 QosType.Reliable => new ReliableChannel(this, i),
                 QosType.ReliableFragmented => new ReliableFragmentedChannel(this, i),
                 QosType.ReliableSequenced => new ReliableSequencedChannel(this, i),
+                // AllCostDelivery is more or less the same as a reliable channel
+                QosType.AllCostDelivery => new ReliableChannel(this, i),
                 _ => throw new NotSupportedException($"QosType {qosType} is not supported!")
             };
         }
