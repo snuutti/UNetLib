@@ -27,6 +27,11 @@ internal abstract class BaseChannel
         }
 
         var payload = reader.ReadBytes(length);
+        ReadPayload(payload);
+    }
+
+    protected void ReadPayload(byte[] payload)
+    {
         Client.EventListener.OnNetworkReceive(Client, new ArraySegment<byte>(payload), ChannelId);
     }
 }
