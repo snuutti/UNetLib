@@ -174,16 +174,31 @@ public class UNetClient
         SendByChannel(type, message, Channels.DefaultReliable);
     }
 
+    public void SendReliable(short type, NetworkWriter networkWriter)
+    {
+        SendByChannel(type, networkWriter, Channels.DefaultReliable);
+    }
+
     public void SendUnreliable(short type, IMessageBase message)
     {
         SendByChannel(type, message, Channels.DefaultUnreliable);
+    }
+
+    public void SendUnreliable(short type, NetworkWriter networkWriter)
+    {
+        SendByChannel(type, networkWriter, Channels.DefaultUnreliable);
     }
 
     public void SendByChannel(short type, IMessageBase message, byte channelId)
     {
         var msgWriter = new NetworkWriter();
         message.Serialize(msgWriter);
-        var msgBuffer = msgWriter.ToArray();
+        SendByChannel(type, msgWriter, channelId);
+    }
+
+    public void SendByChannel(short type, NetworkWriter networkWriter, byte channelId)
+    {
+        var msgBuffer = networkWriter.ToArray();
         var size = (ushort) msgBuffer.Length;
 
         var writer = new NetworkWriter();
