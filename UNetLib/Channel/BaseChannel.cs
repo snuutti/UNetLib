@@ -18,6 +18,13 @@ internal abstract class BaseChannel
 
     public abstract void Prepare(LLNetworkWriter writer, byte[] data);
 
+    public virtual void Send(byte[] data)
+    {
+        var writer = new LLNetworkWriter();
+        Client.BuildPacket(writer, ChannelId, data);
+        Client.Send(writer);
+    }
+
     protected void ReadPayload(LLNetworkReader reader, int length)
     {
         if (length < 0 || reader.Position + length > reader.Length)

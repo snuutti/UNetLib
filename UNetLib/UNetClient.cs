@@ -129,12 +129,7 @@ public class UNetClient
     private void ResendPacket(byte channelId, byte[] data)
     {
         var writer = new LLNetworkWriter();
-
-        WritePacketHeader(writer);
-
-        writer.Write(channelId);
-        writer.Write(data);
-
+        BuildPacketWithPayload(writer, channelId, data);
         Send(writer);
     }
 
@@ -170,9 +165,7 @@ public class UNetClient
 
     public void SendByChannel(byte[] data, byte channelId)
     {
-        var writer = new LLNetworkWriter();
-        BuildPacket(writer, channelId, data);
-        Send(writer);
+        _channels[channelId].Send(data);
     }
 
     public void SendReliable(short type, IMessageBase message)
@@ -236,7 +229,7 @@ public class UNetClient
         }
     }
 
-    private void BuildPacket(LLNetworkWriter writer, byte channelId, byte[]? data)
+    internal void BuildPacket(LLNetworkWriter writer, byte channelId, byte[]? data)
     {
         WritePacketHeader(writer);
 
@@ -248,6 +241,13 @@ public class UNetClient
         writer.Write(channelId);
 
         _channels[channelId].Prepare(writer, data);
+    }
+
+    internal void BuildPacketWithPayload(LLNetworkWriter writer, byte channelId, byte[] payload)
+    {
+        WritePacketHeader(writer);
+        writer.Write(channelId);
+        writer.Write(payload);
     }
 
     internal void SendPing(PingPacket? incomingPing = null)

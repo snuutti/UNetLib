@@ -49,6 +49,11 @@ internal sealed class ReliableFragmentedChannel : BaseChannel
 
     public override void Prepare(LLNetworkWriter writer, byte[] data)
     {
+        throw new NotSupportedException();
+    }
+
+    public override void Send(byte[] data)
+    {
         var fragmentedMessageId = _nextFragmentedMessageId++;
 
         var fragmentAmount = (byte) Math.Ceiling((double) data.Length / MaxFragmentPayloadSize);
@@ -82,8 +87,10 @@ internal sealed class ReliableFragmentedChannel : BaseChannel
             dataOffset += fragmentSize;
 
             var payload = payloadWriter.ToArray();
-            writer.Write(payload);
 
+            var packetWriter = new LLNetworkWriter();
+            Client.BuildPacketWithPayload(packetWriter, ChannelId, payload);
+            Client.Send(packetWriter);
             Client.StoreReliableMessage(messageId, ChannelId, payload);
         }
     }
