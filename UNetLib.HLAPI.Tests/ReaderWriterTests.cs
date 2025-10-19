@@ -57,23 +57,6 @@ public class ReaderWriterTests
     }
 
     [Test]
-    public async Task ReadWrite_ByteArray_IsSymmetrical()
-    {
-        // Arrange
-        var writer = new NetworkWriter();
-        var originalValue = new byte[] { 1, 2, 3, 4, 5 };
-
-        // Act
-        writer.Write(originalValue);
-        var buffer = writer.ToArray();
-        var reader = new NetworkReader(buffer);
-        var readValue = reader.ReadBytes(originalValue.Length);
-
-        // Assert
-        await Assert.That(readValue).IsEquivalentTo(originalValue);
-    }
-
-    [Test]
     public async Task ReadWrite_Boolean_IsSymmetrical()
     {
         // Arrange
@@ -88,6 +71,23 @@ public class ReaderWriterTests
 
         // Assert
         await Assert.That(readValue).IsEqualTo(originalValue);
+    }
+
+    [Test]
+    public async Task ReadWrite_ByteArray_IsSymmetrical()
+    {
+        // Arrange
+        var writer = new NetworkWriter();
+        var originalValue = new byte[] { 1, 2, 3, 4, 5 };
+
+        // Act
+        writer.Write(originalValue);
+        var buffer = writer.ToArray();
+        var reader = new NetworkReader(buffer);
+        var readValue = reader.ReadBytes(originalValue.Length);
+
+        // Assert
+        await Assert.That(readValue).IsEquivalentTo(originalValue);
     }
 
     [Test]
