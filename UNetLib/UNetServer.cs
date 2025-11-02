@@ -20,6 +20,8 @@ public class UNetServer
 
     private readonly ConcurrentDictionary<IPEndPoint, UNetClient> _clients = new();
 
+    private readonly ConcurrentQueue<ushort> _connectionIds = new();
+
     private int _nextConnectionId;
 
     public bool IsRunning { get; private set; }
@@ -201,14 +203,23 @@ public class UNetServer
             return;
         }
 
-        // TODO: We need to manage connection IDs properly. With the current approach they will eventually wrap around and cause issues.
-        var newConnectionId = (ushort) Interlocked.Increment(ref _nextConnectionId);
+        var newConnectionId = GetNextConnectionId();
         var newSessionId = (ushort) Random.Shared.Next(1, ushort.MaxValue);
 
         var client = new UNetClient(this, remoteEndPoint, newConnectionId, packet.LocalConnectionId, newSessionId, packet.SessionId);
         _clients[remoteEndPoint] = client;
 
         client.SendPing();
+    }
+
+    private ushort GetNextConnectionId()
+    {
+        if (_connectionIds.TryDequeue(out var id))
+        {
+            return id;
+        }
+
+        return (ushort) Interlocked.Increment(ref _nextConnectionId);
     }
 
     public void Disconnect(UNetClient client, DisconnectPacket.DisconnectReason reason)
@@ -227,6 +238,7 @@ public class UNetServer
         client.State = UNetClient.ConnectionState.Disconnected;
 
         _clients.TryRemove(client.RemoteEndPoint, out _);
+        _connectionIds.Enqueue(client.ConnectionId);
         _eventListener.OnClientDisconnected(client, reason);
     }
 
