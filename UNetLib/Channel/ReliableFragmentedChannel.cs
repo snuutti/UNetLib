@@ -4,7 +4,7 @@ namespace UNetLib.Channel;
 
 internal sealed class ReliableFragmentedChannel : BaseChannel
 {
-    private byte _nextFragmentedMessageId;
+    private byte _nextFragmentedMessageId = 1;
 
     private readonly Dictionary<byte, FragmentedMessage> _pendingMessages = new();
 
