@@ -40,6 +40,8 @@ public class UNetClient
 
     internal PacketAcks PacketAcks => _packetAcks;
 
+    internal ConnectionConfig Config => _server.Config;
+
     internal IUNetEventListener EventListener => _server.EventListener;
 
     public UNetClient(UNetServer server, IPEndPoint remoteEndPoint, ushort connectionId, ushort remoteConnectionId,
@@ -51,11 +53,11 @@ public class UNetClient
         _remoteConnectionId = remoteConnectionId;
         _sessionId = sessionId;
         _pingSessionId = ConnectionUtils.CalculateRemoteSessionId(remoteSessionId);
-        _channels = new BaseChannel[server.Config.Channels.Count];
+        _channels = new BaseChannel[Config.Channels.Count];
 
         for (byte i = 0; i < _channels.Length; i++)
         {
-            var qosType = server.Config.GetChannelType(i);
+            var qosType = Config.GetChannelType(i);
             _channels[i] = qosType switch
             {
                 QosType.Unreliable => new UnreliableChannel(this, i),
@@ -69,7 +71,7 @@ public class UNetClient
             };
         }
 
-        _packetAcks = new PacketAcks(server.Config.IsAcksLong);
+        _packetAcks = new PacketAcks(Config.IsAcksLong);
     }
 
     internal void ProcessPing(PingPacket incomingPing)
@@ -223,7 +225,7 @@ public class UNetClient
         writer.Write(lastReceivedMessageId);
         writer.Write(acks[0]);
 
-        if (_server.Config.IsAcksLong)
+        if (Config.IsAcksLong)
         {
             writer.Write(acks[1]);
         }

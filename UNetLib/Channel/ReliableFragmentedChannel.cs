@@ -4,8 +4,6 @@ namespace UNetLib.Channel;
 
 internal sealed class ReliableFragmentedChannel : BaseChannel
 {
-    private const int MaxFragmentPayloadSize = 512;
-
     private byte _nextFragmentedMessageId;
 
     private readonly Dictionary<byte, FragmentedMessage> _pendingMessages = new();
@@ -56,7 +54,7 @@ internal sealed class ReliableFragmentedChannel : BaseChannel
     {
         var fragmentedMessageId = _nextFragmentedMessageId++;
 
-        var fragmentAmount = (byte) Math.Ceiling((double) data.Length / MaxFragmentPayloadSize);
+        var fragmentAmount = (byte) Math.Ceiling((double) data.Length / Client.Config.FragmentSize);
         if (fragmentAmount == 0)
         {
             // Handle the case of empty data
@@ -67,7 +65,7 @@ internal sealed class ReliableFragmentedChannel : BaseChannel
         for (byte i = 0; i < fragmentAmount; i++)
         {
             var remainingData = data.Length - dataOffset;
-            var fragmentSize = Math.Min(MaxFragmentPayloadSize, remainingData);
+            var fragmentSize = Math.Min(Client.Config.FragmentSize, remainingData);
 
             var messageId = Client.NextMessageId();
 
