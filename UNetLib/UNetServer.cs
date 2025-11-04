@@ -1,4 +1,3 @@
-using System.Buffers;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
@@ -72,12 +71,14 @@ public class UNetServer
             {
                 var result = await _udpClient!.ReceiveAsync(token);
 
-                var length = result.Buffer.Length;
-                var buffer = ArrayPool<byte>.Shared.Rent(length);
-                Buffer.BlockCopy(result.Buffer, 0, buffer, 0, length);
-
-                ThreadPool.QueueUserWorkItem(ProcessPacketWorkItem,
-                    new PacketWorkItem(buffer, length, result.RemoteEndPoint), false);
+                try
+                {
+                    HandleIncomingPacket(result.Buffer.ToArray(), result.RemoteEndPoint);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error processing packet from {result.RemoteEndPoint}: {ex}");
+                }
             }
             catch (OperationCanceledException)
             {
@@ -90,31 +91,14 @@ public class UNetServer
         }
     }
 
-    private void ProcessPacketWorkItem(PacketWorkItem item)
-    {
-        try
-        {
-            var buffer = item.Buffer.AsSpan(0, item.Length);
-            HandleIncomingPacket(buffer, item.RemoteEndPoint);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error processing packet from {item.RemoteEndPoint}: {ex}");
-        }
-        finally
-        {
-            ArrayPool<byte>.Shared.Return(item.Buffer);
-        }
-    }
-
-    private void HandleIncomingPacket(Span<byte> buffer, IPEndPoint remoteEndPoint)
+    private void HandleIncomingPacket(byte[] buffer, IPEndPoint remoteEndPoint)
     {
         if (buffer.Length < 2)
         {
             return;
         }
 
-        var reader = new LLNetworkReader(buffer.ToArray());
+        var reader = new LLNetworkReader(buffer);
         var connectionId = reader.ReadUInt16();
 
         if (connectionId == 0)
