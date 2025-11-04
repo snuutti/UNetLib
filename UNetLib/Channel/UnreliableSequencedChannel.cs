@@ -15,15 +15,17 @@ internal sealed class UnreliableSequencedChannel : BaseChannel
         var length = reader.ReadUInt16();
         var orderedMessageId = reader.ReadByte();
 
+        var payloadLength = length - 4;
+
         // Drop the packet if it's older than the last processed one
         if (orderedMessageId <= _lastOrderedMessageId && _lastOrderedMessageId != 255)
         {
+            SkipPayload(reader, payloadLength);
             return;
         }
 
         _lastOrderedMessageId = orderedMessageId;
 
-        var payloadLength = length - 4;
         ReadPayload(reader, payloadLength);
     }
 

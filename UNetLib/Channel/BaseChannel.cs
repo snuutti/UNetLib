@@ -25,6 +25,17 @@ internal abstract class BaseChannel
         Client.Send(writer);
     }
 
+    protected void SkipPayload(LLNetworkReader reader, int length)
+    {
+        if (length < 0 || reader.Position + length > reader.Length)
+        {
+            Console.WriteLine($"Invalid payload length {length} from {Client.RemoteEndPoint}!");
+            return;
+        }
+
+        reader.ReadBytes(length);
+    }
+
     protected void ReadPayload(LLNetworkReader reader, int length)
     {
         if (length < 0 || reader.Position + length > reader.Length)

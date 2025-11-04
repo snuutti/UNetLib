@@ -13,14 +13,15 @@ internal sealed class ReliableChannel : BaseChannel
         var length = reader.ReadUInt16();
         var messageId = reader.ReadUInt16();
 
+        var payloadLength = length - 5;
         if (!Client.PacketAcks.ReceiveMessage(messageId))
         {
+            SkipPayload(reader, payloadLength);
             return;
         }
 
         Client.SendAcks();
 
-        var payloadLength = length - 5;
         ReadPayload(reader, payloadLength);
     }
 

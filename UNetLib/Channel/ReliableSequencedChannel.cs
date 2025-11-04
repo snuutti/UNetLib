@@ -20,8 +20,10 @@ internal sealed class ReliableSequencedChannel : BaseChannel
         var messageId = reader.ReadUInt16();
         var orderedMessageId = reader.ReadByte();
 
+        var payloadLength = length - 6;
         if (!Client.PacketAcks.ReceiveMessage(messageId))
         {
+            SkipPayload(reader, payloadLength);
             return;
         }
 
@@ -30,7 +32,6 @@ internal sealed class ReliableSequencedChannel : BaseChannel
         // This is the next expected message, process it and any buffered messages in order
         if (orderedMessageId == _incomingSequenceNumber)
         {
-            var payloadLength = length - 6;
             ReadPayload(reader, payloadLength);
 
             _incomingSequenceNumber++;
@@ -48,7 +49,6 @@ internal sealed class ReliableSequencedChannel : BaseChannel
         {
             if (!_pendingMessages.ContainsKey(orderedMessageId))
             {
-                var payloadLength = length - 6;
                 var payload = reader.ReadBytes(payloadLength);
                 _pendingMessages.Add(orderedMessageId, payload);
             }

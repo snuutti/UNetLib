@@ -17,16 +17,18 @@ internal sealed class ReliableFragmentedChannel : BaseChannel
         var length = reader.ReadUInt16();
         var messageId = reader.ReadUInt16();
 
+        var fragmentedMessageId = reader.ReadByte();
+        var fragmentIndex = reader.ReadByte();
+        var fragmentAmount = reader.ReadByte();
+
+        var payloadLength = length - 8;
         if (!Client.PacketAcks.ReceiveMessage(messageId))
         {
+            SkipPayload(reader, payloadLength);
             return;
         }
 
         Client.SendAcks();
-
-        var fragmentedMessageId = reader.ReadByte();
-        var fragmentIndex = reader.ReadByte();
-        var fragmentAmount = reader.ReadByte();
 
         if (!_pendingMessages.TryGetValue(fragmentedMessageId, out var pendingMsg))
         {
@@ -34,7 +36,6 @@ internal sealed class ReliableFragmentedChannel : BaseChannel
             _pendingMessages[fragmentedMessageId] = pendingMsg;
         }
 
-        var payloadLength = length - 8;
         var fragmentData = reader.ReadBytes(payloadLength);
 
         if (pendingMsg.AddFragment(fragmentIndex, fragmentData))
