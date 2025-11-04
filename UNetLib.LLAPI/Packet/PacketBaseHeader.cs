@@ -4,7 +4,7 @@ public abstract class PacketBaseHeader
 {
     /// <summary>
     /// If 0, this is a system packet.
-    /// Otherwise, identical to <see cref="SystemPacket.LocalConnectionId"/>.
+    /// If 1, this is a user packet.
     /// </summary>
     public ushort ConnectionId { get; set; }
 

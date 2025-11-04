@@ -217,7 +217,7 @@ public class UNetClient
 
     private void WritePacketHeader(LLNetworkWriter writer)
     {
-        writer.Write(_connectionId);
+        writer.Write((ushort) 1);
         writer.Write(NextPacketId());
         writer.Write(_sessionId);
 
