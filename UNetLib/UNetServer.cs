@@ -116,30 +116,31 @@ public class UNetServer
         var requestType = reader.ReadEnum<SystemPacket.SystemRequestType>();
         reader.Position = 0;
 
-        if (!_clients.TryGetValue(remoteEndPoint, out var client) &&
-            requestType != SystemPacket.SystemRequestType.ConnectRequest)
+        if (requestType == SystemPacket.SystemRequestType.ConnectRequest)
+        {
+            var connectRequestPacket = new ConnectPacket();
+            connectRequestPacket.Deserialize(reader);
+            HandleConnectRequest(connectRequestPacket, remoteEndPoint);
+            return;
+        }
+
+        if (!_clients.TryGetValue(remoteEndPoint, out var client))
         {
             return;
         }
 
         switch (requestType)
         {
-            case SystemPacket.SystemRequestType.ConnectRequest:
-                var connectRequest = new ConnectPacket();
-                connectRequest.Deserialize(reader);
-                HandleConnectRequest(connectRequest, remoteEndPoint);
-                break;
-
             case SystemPacket.SystemRequestType.Disconnect:
                 var disconnectPacket = new DisconnectPacket();
                 disconnectPacket.Deserialize(reader);
-                RemoveClient(client!, disconnectPacket.Reason);
+                RemoveClient(client, disconnectPacket.Reason);
                 break;
 
             case SystemPacket.SystemRequestType.Ping:
                 var pingPacket = new PingPacket();
                 pingPacket.Deserialize(reader);
-                client!.ProcessPing(pingPacket);
+                client.ProcessPing(pingPacket);
                 break;
         }
     }
@@ -187,6 +188,12 @@ public class UNetServer
             return;
         }
 
+        var request = new ConnectionRequest(this, packet, remoteEndPoint);
+        _eventListener.OnConnectionRequest(request);
+    }
+
+    internal void AcceptConnection(IPEndPoint remoteEndPoint, ConnectPacket packet)
+    {
         var newConnectionId = GetNextConnectionId();
         var newSessionId = (ushort) Random.Shared.Next(1, ushort.MaxValue);
 
@@ -194,6 +201,25 @@ public class UNetServer
         _clients[remoteEndPoint] = client;
 
         client.SendPing();
+    }
+
+    internal void DenyConnection(IPEndPoint remoteEndPoint, ConnectPacket packet, DisconnectPacket.DisconnectReason reason)
+    {
+        var disconnectPacket = new DisconnectPacket
+        {
+            ConnectionId = 0,
+            RequestType = SystemPacket.SystemRequestType.Disconnect,
+            PacketId = 0,
+            SessionId = packet.SessionId,
+            LocalConnectionId = 0,
+            RemoteConnectionId = packet.LocalConnectionId,
+            LibVersion = 16777472,
+            Reason = reason
+        };
+
+        var writer = new LLNetworkWriter();
+        disconnectPacket.Serialize(writer);
+        Send(remoteEndPoint, writer.ToArray());
     }
 
     private ushort GetNextConnectionId()

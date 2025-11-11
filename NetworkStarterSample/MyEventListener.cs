@@ -5,6 +5,11 @@ namespace NetworkStarterSample;
 
 public class MyEventListener : IUNetEventListener
 {
+    public void OnConnectionRequest(ConnectionRequest request)
+    {
+        request.Accept();
+    }
+
     public void OnClientConnected(UNetClient client)
     {
         Console.WriteLine($"Client connected: {client.RemoteEndPoint}");

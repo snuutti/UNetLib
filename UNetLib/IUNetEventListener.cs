@@ -5,6 +5,13 @@ namespace UNetLib;
 public interface IUNetEventListener
 {
     /// <summary>
+    /// Called when a new client is requesting a connection.
+    /// The connection must be explicitly accepted or rejected via the request object.
+    /// </summary>
+    /// <param name="request">The connection request object.</param>
+    void OnConnectionRequest(ConnectionRequest request);
+
+    /// <summary>
     /// Called when a client has successfully completed the connection handshake.
     /// </summary>
     /// <param name="client">The connected client.</param>
