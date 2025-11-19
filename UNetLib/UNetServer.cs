@@ -15,11 +15,11 @@ public class UNetServer
 
     private UdpClient? _udpClient;
 
-    private CancellationTokenSource? _cts;
-
     private readonly ConcurrentDictionary<IPEndPoint, UNetClient> _clients = new();
 
     private readonly ConcurrentQueue<ushort> _connectionIds = new();
+
+    private IPEndPoint _remoteEndPoint = new(IPAddress.Any, 0);
 
     private int _nextConnectionId;
 
@@ -43,10 +43,6 @@ public class UNetServer
         }
 
         _udpClient = new UdpClient(port);
-        _cts = new CancellationTokenSource();
-
-        Task.Run(ReceiveLoop, _cts.Token);
-
         IsRunning = true;
     }
 
@@ -57,32 +53,36 @@ public class UNetServer
             return;
         }
 
-        _cts?.Cancel();
         _udpClient?.Close();
         IsRunning = false;
     }
 
-    private async Task ReceiveLoop()
+    public void Update()
     {
-        var token = _cts!.Token;
-        while (!token.IsCancellationRequested)
+        PollEvents();
+    }
+
+    private void PollEvents()
+    {
+        if (!IsRunning || _udpClient == null)
+        {
+            return;
+        }
+
+        while (_udpClient.Available > 0)
         {
             try
             {
-                var result = await _udpClient!.ReceiveAsync(token);
+                var result = _udpClient.Receive(ref _remoteEndPoint);
 
                 try
                 {
-                    HandleIncomingPacket(result.Buffer.ToArray(), result.RemoteEndPoint);
+                    HandleIncomingPacket(result, _remoteEndPoint);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error processing packet from {result.RemoteEndPoint}: {ex}");
+                    Console.WriteLine($"Error processing packet from {_remoteEndPoint}: {ex}");
                 }
-            }
-            catch (OperationCanceledException)
-            {
-                break;
             }
             catch (Exception ex)
             {
