@@ -32,7 +32,7 @@ public class UNetClient
 
     private ushort _nextMessageId = 1;
 
-    public ConnectionState State { get; set; }
+    public ConnectionState State { get; internal set; }
 
     public IPEndPoint RemoteEndPoint => _remoteEndPoint;
 
