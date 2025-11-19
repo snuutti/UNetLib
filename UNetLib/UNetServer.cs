@@ -6,7 +6,6 @@ using UNetLib.LLAPI.Packet;
 
 namespace UNetLib;
 
-// TODO: Implement timeouts
 public class UNetServer
 {
     private readonly ConnectionConfig _config;
@@ -60,6 +59,11 @@ public class UNetServer
     public void Update()
     {
         PollEvents();
+
+        foreach (var client in _clients.Values)
+        {
+            client.Update();
+        }
     }
 
     private void PollEvents()

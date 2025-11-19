@@ -32,6 +32,8 @@ public class UNetClient
 
     private ushort _nextMessageId = 1;
 
+    private DateTime _lastPingTime;
+
     public ConnectionState State { get; internal set; }
 
     public IPEndPoint RemoteEndPoint => _remoteEndPoint;
@@ -72,6 +74,19 @@ public class UNetClient
         }
 
         _packetAcks = new PacketAcks(Config.IsAcksLong);
+
+        _lastPingTime = DateTime.UtcNow;
+    }
+
+    internal void Update()
+    {
+        var now = DateTime.UtcNow;
+        var elapsed = (now - _lastPingTime).TotalMilliseconds;
+
+        if (elapsed >= Config.DisconnectTimeout)
+        {
+            Disconnect(DisconnectPacket.DisconnectReason.Timeout);
+        }
     }
 
     internal void ProcessPing(PingPacket incomingPing)
@@ -81,6 +96,8 @@ public class UNetClient
             State = ConnectionState.Connected;
             EventListener.OnClientConnected(this);
         }
+
+        _lastPingTime = DateTime.UtcNow;
 
         SendPing(incomingPing);
     }
