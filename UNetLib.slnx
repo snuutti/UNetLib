@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="NetworkStarterSample/NetworkStarterSample.csproj" />
+  <Project Path="UNetLib.HLAPI.Tests/UNetLib.HLAPI.Tests.csproj" />
+  <Project Path="UNetLib.HLAPI/UNetLib.HLAPI.csproj" />
+  <Project Path="UNetLib.LLAPI.Tests/UNetLib.LLAPI.Tests.csproj" />
+  <Project Path="UNetLib.LLAPI/UNetLib.LLAPI.csproj" />
+  <Project Path="UNetLib/UNetLib.csproj" />
+  <Project Path="UNetProxy/UNetProxy.csproj" />
+</Solution>
