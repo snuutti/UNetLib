@@ -11,7 +11,8 @@ public class ProxyCommand : AsyncCommand<ProxySettings>
 {
     private readonly ConcurrentDictionary<IPEndPoint, UdpSession> _sessions = new();
 
-    public override async Task<int> ExecuteAsync(CommandContext context, ProxySettings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, ProxySettings settings,
+        CancellationToken cancellationToken)
     {
         AnsiConsole.WriteLine("UNetProxy");
         AnsiConsole.WriteLine();
